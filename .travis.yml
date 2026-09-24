@@ -1,3 +1,19 @@
 language: node_js
 node_js:
 - '0.10'
+dist: focal
+addons:
+  chrome: stable
+script:
+# Build + lint (grunt default task), as before.
+- npm test
+# Run the QUnit browser suite (test/index.html) in headless Chrome.
+# The ajax tests need test/data/*.php, so serve the repo root with PHP's built-in
+# server; several workers are needed because some fixtures (e.g.
+# test/data/core/dont_return.php) intentionally hold a request open.
+- PHP_CLI_SERVER_WORKERS=8 php -S localhost:9876 >/tmp/php.log 2>&1 &
+# The runner needs a modern Node; puppeteer-core goes into a throwaway prefix
+# outside the repo and drives the Travis-provided Chrome.
+- nvm install 22
+- npm install --prefix /tmp/runner puppeteer-core@24.43.1
+- NODE_PATH=/tmp/runner/node_modules node test/run-browser-tests.js http://localhost:9876/test/index.html

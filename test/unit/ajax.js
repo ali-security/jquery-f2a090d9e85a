@@ -1586,10 +1586,16 @@ module( "ajax", {
 		}
 	});
 
-	testIframeWithCallback( "#14379 - jQuery.ajax() on unload", "ajax/onunload.html", function( status ) {
-		expect( 1 );
-		strictEqual( status, "success", "Request completed" );
-	});
+	// Not run in Chrome/Chromium: since Chrome 80 the browser itself refuses synchronous
+	// XHR during page dismissal ("NetworkError: Failed to execute 'send' on 'XMLHttpRequest':
+	// ... Synchronous XHR in page dismissal", https://www.chromestatus.com/feature/4664843055398912),
+	// so the request fails regardless of jQuery. Still runs in other browsers.
+	if ( !/chrome/i.test( navigator.userAgent ) ) {
+		testIframeWithCallback( "#14379 - jQuery.ajax() on unload", "ajax/onunload.html", function( status ) {
+			expect( 1 );
+			strictEqual( status, "success", "Request completed" );
+		});
+	}
 
 //----------- jQuery.ajaxPrefilter()
 

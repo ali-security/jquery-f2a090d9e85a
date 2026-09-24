@@ -550,7 +550,10 @@ test("fractions (see #7730 and #7885)", function() {
 
 	result = div.offset();
 
-	equal( result.top, expected.top, "Check top" );
+	// Support: Chrome 73+
+	// Modern Chrome lays out in 1/64px units, so the top offset lands a fraction of a pixel
+	// off (e.g. 999.984375); same tolerance upstream jQuery adopted for this test.
+	ok( Math.abs( result.top - expected.top ) < 0.25, "Check top within 0.25 of expected" );
 	equal( result.left, expected.left, "Check left" );
 
 	div.remove();
